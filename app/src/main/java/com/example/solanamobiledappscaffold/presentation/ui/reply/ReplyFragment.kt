@@ -54,14 +54,16 @@ class ReplyFragment : Fragment() {
             binding.textViewQuestion.text = question.content
             binding.textViewDateReply.text = question.timestamp.toString()
             binding.textViewUserReply.text = question.author.toString()
+
+            binding.recyclerViewReplies.layoutManager = LinearLayoutManager(context)
+            adapter = ReplyAdapter(Constants.reply_list)
+            binding.recyclerViewReplies.adapter = adapter
         }
         else{
             binding.textViewQuestion.text = "No question found"
         }
 
-        binding.recyclerViewReplies.layoutManager = LinearLayoutManager(context)
-        adapter = ReplyAdapter(Constants.reply_list)
-        binding.recyclerViewReplies.adapter = adapter
+
 
         return binding.root
     }
