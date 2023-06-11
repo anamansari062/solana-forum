@@ -1,4 +1,4 @@
-package com.example.solanamobiledappscaffold.presentation.ui.dashboard
+package com.example.solanamobiledappscaffold.presentation.ui.reply
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,31 +8,33 @@ import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.GuardedBy
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import com.example.solanamobiledappscaffold.R
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.solanamobiledappscaffold.common.Constants
 import com.example.solanamobiledappscaffold.common.Constants.getSolanaExplorerUrl
-import com.example.solanamobiledappscaffold.databinding.FragmentDashboardBinding
+import com.example.solanamobiledappscaffold.databinding.FragmentReplyBinding
 import com.example.solanamobiledappscaffold.presentation.ui.extensions.copyToClipboard
 import com.example.solanamobiledappscaffold.presentation.ui.extensions.openInBrowser
 import com.example.solanamobiledappscaffold.presentation.ui.extensions.showSnackbar
 import com.example.solanamobiledappscaffold.presentation.ui.extensions.showSnackbarWithAction
+import com.example.solanamobiledappscaffold.presentation.ui.question.Question
 import com.example.solanamobiledappscaffold.presentation.utils.StartActivityForResultSender
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class DashboardFragment : Fragment() {
+class ReplyFragment : Fragment() {
 
-    private var _binding: FragmentDashboardBinding? = null
+    private var _binding: FragmentReplyBinding? = null
+    private lateinit var adapter: ReplyAdapter
 
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
 
-    private val viewModel: DashboardViewModel by viewModels()
+    private val viewModel: ReplyViewModel by viewModels()
 
     private val activityResultLauncher: ActivityResultLauncher<Intent> =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -44,7 +46,22 @@ class DashboardFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentDashboardBinding.inflate(inflater, container, false)
+        _binding = FragmentReplyBinding.inflate(inflater, container, false)
+
+        val question = arguments?.getSerializable("question") as Question?
+
+        if(question!=null){
+            binding.textViewQuestion.text = question.content
+            binding.textViewDateReply.text = question.timestamp.toString()
+            binding.textViewUserReply.text = question.author.toString()
+        }
+        else{
+            binding.textViewQuestion.text = "No question found"
+        }
+
+        binding.recyclerViewReplies.layoutManager = LinearLayoutManager(context)
+        adapter = ReplyAdapter(Constants.reply_list)
+        binding.recyclerViewReplies.adapter = adapter
 
         return binding.root
     }
@@ -57,22 +74,6 @@ class DashboardFragment : Fragment() {
         }, {
             disableWallet()
         })
-
-        binding.signMsgBtn.setOnClickListener {
-            checkWalletConnected(view) {
-                viewModel.signMessage(intentSender)
-            }
-        }
-
-        binding.sendTransactionBtn.setOnClickListener {
-            checkWalletConnected(view) {
-                viewModel.signTransaction(intentSender)
-            }
-        }
-
-        binding.sendVersionedTransactionBtn.setOnClickListener {
-            requireView().showSnackbar("Coming soon! :)")
-        }
 
         observeViewModel()
     }
@@ -93,39 +94,11 @@ class DashboardFragment : Fragment() {
     }
 
     private fun enableWallet() {
-        binding.signMsgBtn.setTextColor(
-            ContextCompat.getColor(requireContext(), R.color.black),
-        )
 
-        binding.sendTransactionBtn.setTextColor(
-            ContextCompat.getColor(requireContext(), R.color.black),
-        )
-
-        binding.signMsgBtn.setBackgroundColor(
-            ContextCompat.getColor(requireContext(), R.color.solana_green),
-        )
-
-        binding.sendTransactionBtn.setBackgroundColor(
-            ContextCompat.getColor(requireContext(), R.color.solana_green),
-        )
     }
 
     private fun disableWallet() {
-        binding.signMsgBtn.setTextColor(
-            ContextCompat.getColor(requireContext(), R.color.white),
-        )
 
-        binding.sendTransactionBtn.setTextColor(
-            ContextCompat.getColor(requireContext(), R.color.white),
-        )
-
-        binding.signMsgBtn.setBackgroundColor(
-            ContextCompat.getColor(requireContext(), R.color.dark_gray),
-        )
-
-        binding.sendTransactionBtn.setBackgroundColor(
-            ContextCompat.getColor(requireContext(), R.color.dark_gray),
-        )
     }
 
     private fun observeViewModel() {

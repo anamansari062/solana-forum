@@ -1,4 +1,4 @@
-package com.example.solanamobiledappscaffold.presentation.ui.home
+package com.example.solanamobiledappscaffold.presentation.ui.question
 
 import android.content.Intent
 import android.content.res.ColorStateList
@@ -14,27 +14,27 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.solanamobiledappscaffold.R
-import com.example.solanamobiledappscaffold.common.Constants.TWITTER_SHARE_URL
 import com.example.solanamobiledappscaffold.common.Constants.formatAddress
-import com.example.solanamobiledappscaffold.databinding.FragmentHomeBinding
-import com.example.solanamobiledappscaffold.presentation.ui.extensions.copyToClipboard
-import com.example.solanamobiledappscaffold.presentation.ui.extensions.openInBrowser
-import com.example.solanamobiledappscaffold.presentation.ui.extensions.showSnackbar
+import com.example.solanamobiledappscaffold.common.Constants.question_list
+import com.example.solanamobiledappscaffold.databinding.FragmentQuestionBinding
 import com.example.solanamobiledappscaffold.presentation.utils.StartActivityForResultSender
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class HomeFragment : Fragment() {
+class QuestionFragment : Fragment() {
 
-    private var _binding: FragmentHomeBinding? = null
+    private var _binding: FragmentQuestionBinding? = null
+    private lateinit var adapter: QuestionAdapter
 
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
 
-    private val viewModel: HomeViewModel by viewModels()
+    private val viewModel: QuestionViewModel by viewModels()
 
     private val activityResultLauncher: ActivityResultLauncher<Intent> =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -46,7 +46,7 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        _binding = FragmentQuestionBinding.inflate(inflater, container, false)
 
         val animDrawable = binding.root.background as AnimationDrawable
         animDrawable.setEnterFadeDuration(10)
@@ -66,34 +66,24 @@ class HomeFragment : Fragment() {
             viewModel.interactWallet(intentSender)
         }
 
-        // action based on the button text
-        binding.airdropBtn.setOnClickListener {
-            viewModel.uiState.value.wallet?.let {
-                viewModel.requestAirdrop()
-            } ?: view.showSnackbar(
-                "Connect a wallet first!",
-            )
-        }
-
-        binding.copyBtn.setOnClickListener {
-            requireContext().copyToClipboard(
-                "Wallet address",
-                viewModel.uiState.value.wallet?.publicKey58 ?: "",
-            ).let {
-                view.showSnackbar("Copied to clipboard!")
-            }
-        }
-
-        binding.buildDappsBtn.setOnClickListener {
-            requireContext().openInBrowser(TWITTER_SHARE_URL)
-        }
-
         observeViewModel()
+
+        binding.recyclerViewQuestions.layoutManager = LinearLayoutManager(context)
+        adapter = QuestionAdapter(question_list)
+        binding.recyclerViewQuestions.adapter = adapter
+
+        adapter.setOnItemClickListener(object : QuestionAdapter.OnItemClickListener {
+            override fun onItemClick(question: Question) {
+                val args = Bundle()
+                args.putSerializable("question", question)
+                binding.root.findNavController().navigate(R.id.action_navigation_question_to_navigation_reply, args)
+            }
+        })
+
     }
 
     override fun onResume() {
         super.onResume()
-
         viewModel.getBalance()
     }
 
@@ -127,8 +117,6 @@ class HomeFragment : Fragment() {
     }
 
     private fun connectWallet(publicKey: String) {
-        // show the copy button
-        binding.copyBtn.visibility = View.VISIBLE
 
         binding.walletBtn.text = formatAddress(publicKey)
         binding.walletBtn.setTextColor(
@@ -142,14 +130,9 @@ class HomeFragment : Fragment() {
         binding.walletBtn.iconTint =
             ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.teal))
 
-        binding.airdropBtn.setBackgroundColor(
-            ContextCompat.getColor(requireContext(), R.drawable.text_background as Int),
-        )
     }
 
     private fun disconnectWallet() {
-        // hide the copy button
-        binding.copyBtn.visibility = View.GONE
 
         binding.walletBtn.text = getString(R.string.select_wallet)
         binding.walletBtn.setTextColor(
@@ -161,10 +144,6 @@ class HomeFragment : Fragment() {
 
         binding.walletBtn.iconTint =
             ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.red))
-
-        binding.airdropBtn.setBackgroundColor(
-            ContextCompat.getColor(requireContext(), R.color.dark_gray),
-        )
     }
 
     private val intentSender = object : StartActivityForResultSender {

@@ -1,5 +1,8 @@
 package com.example.solanamobiledappscaffold.common
 
+import com.example.solanamobiledappscaffold.presentation.ui.question.Question
+import com.example.solanamobiledappscaffold.presentation.ui.reply.Reply
+import com.solana.core.PublicKey
 import java.math.BigDecimal
 import java.math.MathContext
 import java.math.RoundingMode
@@ -8,8 +11,8 @@ object Constants {
     const val LAMPORTS_PER_SOL = 1000000000L
     const val dAPP_NAME = "Solana Mobile Dapp Scaffold"
     const val SOLANA_URL = "https://solana.com"
-    const val TWITTER_SHARE_URL =
-        "https://twitter.com/intent/tweet?text=%22Believe%20me%2C%20there%20is%20no%20better%20time%20to%20build%20consumer%20mobile%20dApps.%22%20-%20%40cdhiraj40%0A%0AStart%20building%20on%20%40solanamobile%20today!&url=https%3A%2F%2Fgithub.com%2Fcdhiraj40%2Fmobile-dapp-scaffold%2F%20"
+    val question_list = listOf(Question(PublicKey("123"), 123, "What is Solana?", 1, 0, 0))
+    val reply_list = listOf(Reply(PublicKey("123"), 123, "Solana is a fast, secure, and censorship resistant blockchain providing the open infrastructure required for global adoption.", 1, 0, 0), Reply(PublicKey("234"), 234, "Blockchain technology", 1, 1, 0))
 
     fun getSolanaExplorerUrl(transactionID: String) =
         "https://explorer.solana.com/tx/$transactionID?cluster=devnet"

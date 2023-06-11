@@ -1,4 +1,4 @@
-package com.example.solanamobiledappscaffold.presentation.ui.home
+package com.example.solanamobiledappscaffold.presentation.ui.question
 
 import com.example.solanamobiledappscaffold.domain.model.Wallet
 import java.math.BigDecimal

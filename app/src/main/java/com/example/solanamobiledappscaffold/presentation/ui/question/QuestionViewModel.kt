@@ -1,4 +1,4 @@
-package com.example.solanamobiledappscaffold.presentation.ui.home
+package com.example.solanamobiledappscaffold.presentation.ui.question
 
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -39,7 +39,7 @@ import java.util.concurrent.TimeoutException
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(
+class QuestionViewModel @Inject constructor(
     private val authorizeWalletUseCase: AuthorizeWalletUseCase,
     private val requestAirdropUseCase: RequestAirdropUseCase,
     private val balanceUseCase: BalanceUseCase,

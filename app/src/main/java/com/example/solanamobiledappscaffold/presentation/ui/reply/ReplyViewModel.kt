@@ -1,4 +1,4 @@
-package com.example.solanamobiledappscaffold.presentation.ui.dashboard
+package com.example.solanamobiledappscaffold.presentation.ui.reply
 
 import android.content.ActivityNotFoundException
 import android.net.Uri
@@ -42,14 +42,14 @@ import java.util.concurrent.TimeoutException
 import javax.inject.Inject
 
 @HiltViewModel
-class DashboardViewModel @Inject constructor(
+class ReplyViewModel @Inject constructor(
     private val authorizeWalletUseCase: AuthorizeWalletUseCase,
     private val walletStorageUseCase: BasicWalletStorageUseCase,
     private val getLatestBlockhashUseCase: GetLatestBlockhashUseCase,
     private val signMessageUseCase: SignMessageUseCase,
     private val sendTransactionUseCase: SendTransactionUseCase,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(DashboardState())
+    private val _uiState = MutableStateFlow(ReplyState())
     val uiState = _uiState.asStateFlow()
 
     private val _solana = MutableLiveData<Solana>()
@@ -121,13 +121,13 @@ class DashboardViewModel @Inject constructor(
                     }
                 }
                 is Resource.Loading -> {
-                    _uiState.value = DashboardState(
+                    _uiState.value = ReplyState(
                         isLoading = true,
                     )
                 }
                 is Resource.Error -> {
                     Log.e(TAG, "Authorization failed")
-                    _uiState.value = DashboardState(
+                    _uiState.value = ReplyState(
                         error = result.message
                             ?: "An unexpected error occurred",
                         isLoading = false,
@@ -253,13 +253,13 @@ class DashboardViewModel @Inject constructor(
                                             }
                                         }
                                         is Resource.Loading -> {
-                                            _uiState.value = DashboardState(
+                                            _uiState.value = ReplyState(
                                                 isLoading = true,
                                             )
                                         }
                                         is Resource.Error -> {
                                             Log.e(TAG, "Authorization failed")
-                                            _uiState.value = DashboardState(
+                                            _uiState.value = ReplyState(
                                                 error = result.message
                                                     ?: "An unexpected error occurred",
                                                 isLoading = false,
@@ -272,7 +272,7 @@ class DashboardViewModel @Inject constructor(
                             }
                             is Resource.Error -> {
                                 Log.e(TAG, "Fetch blockhash failed")
-                                _uiState.value = DashboardState(
+                                _uiState.value = ReplyState(
                                     error = blockHash.message
                                         ?: "An unexpected error occurred",
                                     isLoading = false,

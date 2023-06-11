@@ -17,4 +17,11 @@
     <string name="send_transaction">Send Transaction</string>
     <string name="send_versioned_transaction">Send Versioned Transaction</string>
     <string name="build_mobile_dapps">Build mobile dApps</string>
+    <string name="question">Question</string>
+    <string name="delete_reply">Delete Reply</string>
+    <string name="reply">Reply</string>
+    <string name="date">Date</string>
+    <string name="username">Username</string>
+    <string name="question_delete">Question Delete</string>
+    <string name="type_a_question">Type a question</string>
 </resources>

@@ -3,17 +3,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_home">
+    app:startDestination="@+id/navigation_question">
 
     <fragment
-        android:id="@+id/navigation_home"
-        android:name="com.example.solanamobiledappscaffold.presentation.ui.home.HomeFragment"
-        android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
+        android:id="@+id/navigation_question"
+        android:name="com.example.solanamobiledappscaffold.presentation.ui.question.QuestionFragment"
+        android:label="@string/question"
+        tools:layout="@layout/fragment_question" >
+        <action
+            android:id="@+id/action_navigation_question_to_navigation_reply"
+            app:destination="@id/navigation_reply" />
+    </fragment>
 
     <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="com.example.solanamobiledappscaffold.presentation.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        android:id="@+id/navigation_reply"
+        android:name="com.example.solanamobiledappscaffold.presentation.ui.reply.ReplyFragment"
+        android:label="@string/reply"
+        tools:layout="@layout/fragment_reply" />
 </navigation>
