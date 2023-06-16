@@ -4,11 +4,14 @@ skip-lint = false
 [programs.localnet]
 forum = "8x5aw7mFZgZRqDttYVPcKLQUrNvRpau9Sd6tNqTreMNF"
 
+[programs.devnet]
+forum = "8x5aw7mFZgZRqDttYVPcKLQUrNvRpau9Sd6tNqTreMNF"
+
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "Devnet"
 wallet = "/Users/anamansari/.config/solana/id.json"
 
 [scripts]

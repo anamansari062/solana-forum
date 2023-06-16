@@ -68,6 +68,10 @@ class QuestionFragment : Fragment() {
 
         observeViewModel()
 
+        binding.buttonAsk.setOnClickListener(View.OnClickListener {
+            viewModel.sendQuestion(intentSender, "fdsfds")
+        })
+
         binding.recyclerViewQuestions.layoutManager = LinearLayoutManager(context)
         adapter = QuestionAdapter(question_list)
         binding.recyclerViewQuestions.adapter = adapter
@@ -81,6 +85,7 @@ class QuestionFragment : Fragment() {
         })
 
     }
+
 
     override fun onResume() {
         super.onResume()

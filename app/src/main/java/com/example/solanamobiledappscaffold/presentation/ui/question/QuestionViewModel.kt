@@ -7,18 +7,26 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.solanamobiledappscaffold.BuildConfig
 import com.example.solanamobiledappscaffold.R
 import com.example.solanamobiledappscaffold.common.Constants
 import com.example.solanamobiledappscaffold.common.Constants.formatBalance
 import com.example.solanamobiledappscaffold.common.Resource
 import com.example.solanamobiledappscaffold.domain.model.Wallet
 import com.example.solanamobiledappscaffold.domain.use_case.basic_storage.BasicWalletStorageUseCase
+import com.example.solanamobiledappscaffold.domain.use_case.pda.PdaUseCase
 import com.example.solanamobiledappscaffold.domain.use_case.solana_rpc.authorize_wallet.AuthorizeWalletUseCase
+import com.example.solanamobiledappscaffold.domain.use_case.solana_rpc.sign_transaction.SendTransactionUseCase
 import com.example.solanamobiledappscaffold.domain.use_case.solana_rpc.transactions_usecase.BalanceUseCase
+import com.example.solanamobiledappscaffold.domain.use_case.solana_rpc.transactions_usecase.GetLatestBlockhashUseCase
 import com.example.solanamobiledappscaffold.domain.use_case.solana_rpc.transactions_usecase.RequestAirdropUseCase
 import com.example.solanamobiledappscaffold.presentation.utils.StartActivityForResultSender
 import com.solana.Solana
+import com.solana.api.sendRawTransaction
 import com.solana.core.PublicKey
+import com.solana.core.PublicKey.Companion.createProgramAddress
+import com.solana.core.SerializeConfig
+import com.solana.core.Transaction
 import com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient
 import com.solana.mobilewalletadapter.clientlib.scenario.LocalAssociationIntentCreator
 import com.solana.mobilewalletadapter.clientlib.scenario.LocalAssociationScenario
@@ -37,6 +45,7 @@ import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import javax.inject.Inject
+import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities.Public
 
 @HiltViewModel
 class QuestionViewModel @Inject constructor(
@@ -44,7 +53,9 @@ class QuestionViewModel @Inject constructor(
     private val requestAirdropUseCase: RequestAirdropUseCase,
     private val balanceUseCase: BalanceUseCase,
     private val walletStorageUseCase: BasicWalletStorageUseCase,
-) : ViewModel() {
+    private val getLatestBlockhashUseCase: GetLatestBlockhashUseCase,
+    private val sendTransactionUseCase: SendTransactionUseCase,
+    ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeState())
     val uiState = _uiState.asStateFlow()
@@ -212,6 +223,149 @@ class QuestionViewModel @Inject constructor(
         }
     }
 
+    private suspend fun getLatestBlockhash(solana: Solana): Resource<String> {
+        var blockHash: Resource<String> = Resource.Loading()
+        getLatestBlockhashUseCase(solana).collect { result ->
+            blockHash = when (result) {
+                is Resource.Success -> {
+                    result
+                }
+                is Resource.Loading -> {
+                    result
+                }
+                is Resource.Error -> {
+                    result
+                }
+            }
+        }
+        return blockHash
+    }
+
+    fun sendQuestion(sender: StartActivityForResultSender, question: String) = viewModelScope.launch {
+        _solana.value?.let { solana ->
+            withContext(viewModelScope.coroutineContext + Dispatchers.IO) {
+                getLatestBlockhash(solana).let { blockHash ->
+                    run {
+                        when (blockHash) {
+                            is Resource.Success -> {
+                                Log.d(TAG, "Blockhash: ${blockHash.data}")
+                                localAssociateAndExecute(sender) { client ->
+                                    when (val result = authorizeWalletUseCase(client)) {
+                                        is Resource.Success -> {
+                                            Log.d(TAG, "Wallet connected: ${result.data}")
+
+                                            _uiState.update {
+                                                it.copy(
+                                                    wallet = result.data,
+                                                )
+                                            }
+
+                                            walletStorageUseCase.saveWallet(
+                                                Wallet(
+                                                    result.data!!.publicKey58,
+                                                    result.data.publicKey64,
+                                                    result.data.balance,
+                                                ),
+                                            )
+
+                                            val pdaUseCase = PdaUseCase()
+                                            val instruction = pdaUseCase.initializeProgramInfo(PublicKey(walletStorageUseCase.publicKey58!!))
+
+                                            val transaction = Transaction()
+                                            transaction.setRecentBlockHash(blockHash.data!!)
+                                            transaction.addInstruction(instruction)
+                                            transaction.feePayer =
+                                                PublicKey(walletStorageUseCase.publicKey58!!)
+
+                                            val transactions = Array(1) {
+                                                transaction.serialize(
+                                                    config = SerializeConfig(
+                                                        requireAllSignatures = false,
+                                                    ),
+                                                )
+                                            }
+
+
+
+                                            when (
+                                                val message = sendTransactionUseCase(
+                                                    client,
+                                                    transactions,
+                                                )
+                                            ) {
+                                                is Resource.Success -> {
+                                                    com.example.solanamobiledappscaffold.domain.model.Transaction(
+                                                        message.data!!.signedTransaction,
+                                                    ).let { transaction ->
+
+                                                        // TODO: convert to usecase
+                                                        solana.api.sendRawTransaction(message.data.signedTransaction)
+                                                            .onSuccess { transactionID ->
+                                                                Log.d(
+                                                                    TAG,
+                                                                    "Transaction sent: $transactionID",
+                                                                )
+                                                            }
+                                                            .onFailure {
+                                                                Log.d(
+                                                                    TAG,
+                                                                    it.localizedMessage
+                                                                        ?: it.message.toString(),
+                                                                )
+                                                            }
+
+                                                        Log.d(
+                                                            TAG,
+                                                            "Transaction: ${
+                                                                com.example.solanamobiledappscaffold.domain.model.Transaction(
+                                                                    signedTransaction = transaction.signedTransaction,
+                                                                )
+                                                            }",
+                                                        )
+                                                    }
+                                                }
+
+                                                is Resource.Loading -> {
+                                                }
+
+                                                is Resource.Error -> {
+                                                    Log.e(TAG, message.message.toString())
+                                                }
+                                            }
+                                        }
+                                        is Resource.Loading -> {
+                                            _uiState.value = HomeState(
+                                                isLoading = true,
+                                            )
+                                        }
+                                        is Resource.Error -> {
+                                            Log.e(TAG, "Authorization failed")
+                                            _uiState.value = HomeState(
+                                                error = result.message
+                                                    ?: "An unexpected error occurred",
+                                                isLoading = false,
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            is Resource.Loading -> {
+                            }
+                            is Resource.Error -> {
+                                Log.e(TAG, "Fetch blockhash failed")
+                                _uiState.value = HomeState(
+                                    error = blockHash.message
+                                        ?: "An unexpected error occurred",
+                                    isLoading = false,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private suspend fun <T> localAssociateAndExecute(
         sender: StartActivityForResultSender,
         uriPrefix: Uri? = null,
@@ -272,6 +426,7 @@ class QuestionViewModel @Inject constructor(
             }
         }
     }
+
 
     companion object {
         private const val TAG = "HomeViewModel"
