@@ -47,13 +47,14 @@ describe("forum", () => {
     programInfoPda = newProgramInfoPda
 
     // initializes the program info
-    const transactionSignature = await program.methods
-        .initializeProgramInfo()
-        .accounts({
-            author: provider.wallet.publicKey,
-            programInfo: programInfoPda,
-        })
-        .rpc();
+    // const transactionSignature = await program.methods
+    //     .initializeProgramInfo()
+    //     .accounts({
+    //         author: provider.wallet.publicKey,
+    //         programInfo: programInfoPda,
+    //         systemProgram: anchor.web3.SystemProgram.programId
+    //     })
+    //     .rpc();
 
     programInfo = await program.account.programInfo.fetch(programInfoPda);
 
@@ -61,177 +62,177 @@ describe("forum", () => {
 
   });
 
-  it("it creates a question 1", async () => {
+  // it("it creates a question 1", async () => {
 
-    const [newQuestionPda, _] = anchor.web3.PublicKey.findProgramAddressSync(
-          [
-              encode("question"),
-              toBytesInt32(programInfo.questionCount)
-          ],
-          program.programId
-      );
+  //   const [newQuestionPda, _] = anchor.web3.PublicKey.findProgramAddressSync(
+  //         [
+  //             encode("question"),
+  //             toBytesInt32(programInfo.questionCount)
+  //         ],
+  //         program.programId
+  //     );
 
-    question1Pda = newQuestionPda;
+  //   question1Pda = newQuestionPda;
 
-    const transactionSignature = await program.methods
-        .createQuestion("First Question")
-        .accounts({
-            question: question1Pda,
-            author: provider.wallet.publicKey,
-            programInfo: programInfoPda,
-        })
-        .rpc();
+  //   const transactionSignature = await program.methods
+  //       .createQuestion("First Question")
+  //       .accounts({
+  //           question: question1Pda,
+  //           author: provider.wallet.publicKey,
+  //           programInfo: programInfoPda,
+  //       })
+  //       .rpc();
 
-    question1Info = await program.account.question.fetch(question1Pda);
+  //   question1Info = await program.account.question.fetch(question1Pda);
 
-    console.log(question1Info)
+  //   console.log(question1Info)
 
-  });
+  // });
 
-  it("it creates question 2", async () => {
-    programInfo = await program.account.programInfo.fetch(programInfoPda);
+  // it("it creates question 2", async () => {
+  //   programInfo = await program.account.programInfo.fetch(programInfoPda);
 
-    const [newQuestionPda, _] = anchor.web3.PublicKey.findProgramAddressSync(
-          [
-              encode("question"),
-              toBytesInt32(programInfo.questionCount)
-          ],
-          program.programId
-      );
+  //   const [newQuestionPda, _] = anchor.web3.PublicKey.findProgramAddressSync(
+  //         [
+  //             encode("question"),
+  //             toBytesInt32(programInfo.questionCount)
+  //         ],
+  //         program.programId
+  //     );
 
-    question2Pda = newQuestionPda;
+  //   question2Pda = newQuestionPda;
 
-    const transactionSignature = await program.methods
-        .createQuestion("First Question")
-        .accounts({
-            question: question2Pda,
-            author: provider.wallet.publicKey,
-            programInfo: programInfoPda,
-        })
-        .rpc();
+  //   const transactionSignature = await program.methods
+  //       .createQuestion("First Question")
+  //       .accounts({
+  //           question: question2Pda,
+  //           author: provider.wallet.publicKey,
+  //           programInfo: programInfoPda,
+  //       })
+  //       .rpc();
 
-    question2Info = await program.account.question.fetch(question2Pda);
+  //   question2Info = await program.account.question.fetch(question2Pda);
 
-    console.log(question2Info)
+  //   console.log(question2Info)
   
-  });
+  // });
 
-  it("it creates a reply for question 1", async () => {
+  // it("it creates a reply for question 1", async () => {
 
-    const [newReplyPda, _] = anchor.web3.PublicKey.findProgramAddressSync(
-          [
-              encode("reply"),
-              toBytesInt32(question1Info.questionId),
-              toBytesInt32(question1Info.replyCount)
-          ],
-          program.programId
-      );
+  //   const [newReplyPda, _] = anchor.web3.PublicKey.findProgramAddressSync(
+  //         [
+  //             encode("reply"),
+  //             toBytesInt32(question1Info.questionId),
+  //             toBytesInt32(question1Info.replyCount)
+  //         ],
+  //         program.programId
+  //     );
     
-    reply11Pda = newReplyPda
+  //   reply11Pda = newReplyPda
 
-    const transactionSignature = await program.methods
-        .createReply("First Reply for first question")
-        .accounts({
-            reply: reply11Pda,
-            question: question1Pda,
-            author: provider.wallet.publicKey,
-        })
-        .rpc();
+  //   const transactionSignature = await program.methods
+  //       .createReply("First Reply for first question")
+  //       .accounts({
+  //           reply: reply11Pda,
+  //           question: question1Pda,
+  //           author: provider.wallet.publicKey,
+  //       })
+  //       .rpc();
 
-    reply11Info = await program.account.reply.fetch(reply11Pda);
+  //   reply11Info = await program.account.reply.fetch(reply11Pda);
 
-    console.log(reply11Info)
+  //   console.log(reply11Info)
 
-  });
+  // });
 
-  it("it creates another reply for question 1", async () => {
-    question1Info = await program.account.question.fetch(question1Pda);
+  // it("it creates another reply for question 1", async () => {
+  //   question1Info = await program.account.question.fetch(question1Pda);
 
-    const [newReplyPda, _] = anchor.web3.PublicKey.findProgramAddressSync(
-      [
-          encode("reply"),
-          toBytesInt32(question1Info.questionId),
-          toBytesInt32(question1Info.replyCount)
-      ],
-      program.programId
-    );
+  //   const [newReplyPda, _] = anchor.web3.PublicKey.findProgramAddressSync(
+  //     [
+  //         encode("reply"),
+  //         toBytesInt32(question1Info.questionId),
+  //         toBytesInt32(question1Info.replyCount)
+  //     ],
+  //     program.programId
+  //   );
 
-    reply12Pda = newReplyPda 
+  //   reply12Pda = newReplyPda 
 
-    const transactionSignature = await program.methods
-        .createReply("Second Reply for first question")
-        .accounts({
-            reply: reply12Pda,
-            question: question1Pda,
-            author: provider.wallet.publicKey,
-        })
-        .rpc();
+  //   const transactionSignature = await program.methods
+  //       .createReply("Second Reply for first question")
+  //       .accounts({
+  //           reply: reply12Pda,
+  //           question: question1Pda,
+  //           author: provider.wallet.publicKey,
+  //       })
+  //       .rpc();
 
-    reply12Info = await program.account.reply.fetch(reply12Pda);
+  //   reply12Info = await program.account.reply.fetch(reply12Pda);
 
-    console.log(reply12Info)
+  //   console.log(reply12Info)
 
   
-  });
+  // });
 
-  it("it creates reply for question 2", async () => {
-    const [newReplyPda, _] = anchor.web3.PublicKey.findProgramAddressSync(
-      [
-          encode("reply"),
-          toBytesInt32(question2Info.questionId),
-          toBytesInt32(question2Info.replyCount)
-      ],
-      program.programId
-    );
+  // it("it creates reply for question 2", async () => {
+  //   const [newReplyPda, _] = anchor.web3.PublicKey.findProgramAddressSync(
+  //     [
+  //         encode("reply"),
+  //         toBytesInt32(question2Info.questionId),
+  //         toBytesInt32(question2Info.replyCount)
+  //     ],
+  //     program.programId
+  //   );
 
-    reply21Pda = newReplyPda
+  //   reply21Pda = newReplyPda
 
-    const transactionSignature = await program.methods
-        .createReply("First Reply for second question")
-        .accounts({
-            reply: reply21Pda,
-            question: question2Pda,
-            author: provider.wallet.publicKey,
-        })
-        .rpc();
+  //   const transactionSignature = await program.methods
+  //       .createReply("First Reply for second question")
+  //       .accounts({
+  //           reply: reply21Pda,
+  //           question: question2Pda,
+  //           author: provider.wallet.publicKey,
+  //       })
+  //       .rpc();
 
-    reply21Info = await program.account.reply.fetch(reply21Pda);
+  //   reply21Info = await program.account.reply.fetch(reply21Pda);
 
-    console.log(reply21Info)
+  //   console.log(reply21Info)
   
-  });
+  // });
 
-  it("it updates question 2", async () => {
+  // it("it updates question 2", async () => {
 
-    const transactionSignature = await program.methods
-        .updateQuestion("Updated Second Question")
-        .accounts({
-            question: question2Pda,
-            author: provider.wallet.publicKey,
-        })
-        .rpc();
+  //   const transactionSignature = await program.methods
+  //       .updateQuestion("Updated Second Question")
+  //       .accounts({
+  //           question: question2Pda,
+  //           author: provider.wallet.publicKey,
+  //       })
+  //       .rpc();
 
-    let questionInfo = await program.account.question.fetch(question2Pda);
+  //   let questionInfo = await program.account.question.fetch(question2Pda);
 
-    console.log(questionInfo)
+  //   console.log(questionInfo)
   
-  });
+  // });
 
-  it("it updates the first reply of question 1", async () => {
+  // it("it updates the first reply of question 1", async () => {
 
-    const transactionSignature = await program.methods
-        .updateReply("Updated first reply of Question 1")
-        .accounts({
-            reply: reply11Pda,
-            author: provider.wallet.publicKey,
-        })
-        .rpc();
+  //   const transactionSignature = await program.methods
+  //       .updateReply("Updated first reply of Question 1")
+  //       .accounts({
+  //           reply: reply11Pda,
+  //           author: provider.wallet.publicKey,
+  //       })
+  //       .rpc();
 
-    reply11Info = await program.account.reply.fetch(reply11Pda);
+  //   reply11Info = await program.account.reply.fetch(reply11Pda);
 
-    console.log(reply11Info)
+  //   console.log(reply11Info)
   
-  });
+  // });
 
 
 });

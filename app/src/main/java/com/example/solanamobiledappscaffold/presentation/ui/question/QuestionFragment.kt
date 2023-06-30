@@ -69,7 +69,7 @@ class QuestionFragment : Fragment() {
         observeViewModel()
 
         binding.buttonAsk.setOnClickListener(View.OnClickListener {
-            viewModel.sendQuestion(intentSender, "fdsfds")
+            viewModel.sendQuestion(intentSender, binding.editTextQuestion.text.toString())
         })
 
         binding.recyclerViewQuestions.layoutManager = LinearLayoutManager(context)

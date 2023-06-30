@@ -5,7 +5,7 @@ mod state;
 mod instructions;
 mod errors;
 
-declare_id!("8x5aw7mFZgZRqDttYVPcKLQUrNvRpau9Sd6tNqTreMNF");
+declare_id!("Gs4PpmRLnwjra33Y2kaxHwyM6KXBMmPAsw8FEFhyi8rF");
 
 #[program]
 pub mod forum {

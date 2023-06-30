@@ -269,7 +269,7 @@ class QuestionViewModel @Inject constructor(
                                             )
 
                                             val pdaUseCase = PdaUseCase()
-                                            val instruction = pdaUseCase.initializeProgramInfo(PublicKey(walletStorageUseCase.publicKey58!!))
+                                            val instruction = pdaUseCase.createQuestion(PublicKey(walletStorageUseCase.publicKey58!!), question)
 
                                             val transaction = Transaction()
                                             transaction.setRecentBlockHash(blockHash.data!!)
