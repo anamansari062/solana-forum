@@ -13,8 +13,6 @@ import com.solana.models.buffer.AccountInfoData
 import com.solana.networking.serialization.serializers.base64.BorshAsBase64JsonArraySerializer
 import com.solana.networking.serialization.serializers.solana.AnchorInstructionSerializer
 import com.solana.programs.SystemProgram
-import com.solana.rxsolana.api.getAccountInfo
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 
 class PdaUseCase {
@@ -51,7 +49,8 @@ class PdaUseCase {
             Borsh.encodeToByteArray(AnchorInstructionSerializer("initialize_program_info"), Args_createProgramInfo()))
 
     }
-    fun createQuestion(author: PublicKey, question: String): TransactionInstruction {
+    suspend fun createQuestion(author: PublicKey, question: String, solana: Solana): TransactionInstruction {
+        fetchQuestionCount(solana)
         val keys = mutableListOf<AccountMeta>()
         keys.add(AccountMeta(getQuestionPda().address, false, true))
         keys.add(AccountMeta(getProgramInfoPda().address, false, true))
@@ -75,6 +74,15 @@ class PdaUseCase {
             PublicKey(BuildConfig.PROGRAM_ID),
             keys,
             Borsh.encodeToByteArray(AnchorInstructionSerializer("create_reply"), Args_replyQuestion(reply)))
+    }
+
+     suspend fun fetchQuestionCount(solana: Solana): Long {
+         val serializer = AccountInfoSerializer(BorshAsBase64JsonArraySerializer((AccountInfoData.serializer())))
+         val account = solana.api.getAccountInfo(serializer, getProgramInfoPda().address).getOrThrow()
+         if (account != null) {
+             Log.d(TAG, "fetchQuestionCount: ${account.data}")
+         }
+        return 0
     }
 
     private fun write4BytesToBuffer(buffer: ByteArray, offset: Int, data: Int): ByteArray {

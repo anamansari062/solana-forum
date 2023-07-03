@@ -241,6 +241,16 @@ class QuestionViewModel @Inject constructor(
         return blockHash
     }
 
+    fun test(sender: StartActivityForResultSender) = viewModelScope.launch {
+        _solana.value?.let { solana ->
+            withContext(viewModelScope.coroutineContext + Dispatchers.IO) {
+                val pdaUseCase = PdaUseCase()
+                pdaUseCase.fetchQuestionCount(solana)
+            }
+
+        }
+    }
+
     fun sendQuestion(sender: StartActivityForResultSender, question: String) = viewModelScope.launch {
         _solana.value?.let { solana ->
             withContext(viewModelScope.coroutineContext + Dispatchers.IO) {
@@ -269,7 +279,7 @@ class QuestionViewModel @Inject constructor(
                                             )
 
                                             val pdaUseCase = PdaUseCase()
-                                            val instruction = pdaUseCase.createQuestion(PublicKey(walletStorageUseCase.publicKey58!!), question)
+                                            val instruction = pdaUseCase.createQuestion(PublicKey(walletStorageUseCase.publicKey58!!), question, solana)
 
                                             val transaction = Transaction()
                                             transaction.setRecentBlockHash(blockHash.data!!)
